@@ -29,7 +29,11 @@ function App() {
                 <Login />
               </AuthLayout>
             } />
-            
+            <Route path="/register" element={
+              <AuthLayout>
+                <Register />
+              </AuthLayout>
+            } />
             {/* Protected routes */}
             <Route path="/" element={
               <ProtectedRoute>
@@ -38,17 +42,17 @@ function App() {
             }>
               <Route index element={<Dashboard />} />
               <Route path="products" element={
-                <RoleBasedRoute requiredRole="staff">
+                <RoleBasedRoute requiredRole="Admin">
                   <Products />
                 </RoleBasedRoute>
               } />
               <Route path="suppliers" element={
-                <RoleBasedRoute requiredRole="manager">
+                <RoleBasedRoute requiredRole="Manager">
                   <Suppliers />
                 </RoleBasedRoute>
               } />
               <Route path="users" element={
-                <RoleBasedRoute requiredRole="admin">
+                <RoleBasedRoute requiredRole="Admin">
                   <Users />
                 </RoleBasedRoute>
               } />

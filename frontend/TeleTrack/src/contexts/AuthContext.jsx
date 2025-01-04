@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
+import { authService } from "../services/api.js";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -22,6 +23,10 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
+  const signup = async (userData)=>{
+    const response  = await authService.register(userData);
+    return response;
+  }
   const login = (userData) => {
     const { token, role, name } = userData;
     localStorage.setItem('token', token);
@@ -41,9 +46,9 @@ export function AuthProvider({ children }) {
     if (!user) return false;
     
     const roleHierarchy = {
-      admin: 3,
-      manager: 2,
-      staff: 1
+      Admin: 3,
+      Manager: 2,
+      Staff: 1
     };
 
     return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
@@ -52,6 +57,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{ 
       user, 
+      signup,
       setUser, 
       hasPermission, 
       loading,

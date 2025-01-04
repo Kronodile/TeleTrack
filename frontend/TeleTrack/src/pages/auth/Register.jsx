@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Box, 
@@ -10,14 +10,17 @@ import {
   Divider 
 } from '@mui/material';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../../contexts/AuthContext';
 
 function Register() {
+  const authContext = useContext(AuthContext);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    username: '',
+    // email: '',
     password: '',
-    confirmPassword: ''
+    // confirmPassword: '',
+    role:''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,20 +29,33 @@ function Register() {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
+    // if (formData.password !== formData.confirmPassword) {
+    //   setError('Passwords do not match');
+    //   return;
+    // }
 
     setLoading(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
-      localStorage.setItem('token', 'dummy-token');
+    const response = await authContext.signup(formData);
+    console.log(response);
+    
+    authContext.setUser(response.data.user);
+    localStorage.setItem("token",response.data.token);
+    localStorage.setItem("userRole",response.data.user.role);
+    localStorage.setItem("userName",response.data.user.username);
+
+    if(response.error){
+      setError(response.data.error);
+    }
+    else{
       toast.success('Registration successful!');
       navigate('/');
       setLoading(false);
-    }, 1000);
+    }
+    // Simulate API call delay
+    // setTimeout(() => {
+    //   localStorage.setItem('token', 'dummy-token');
+    // }, 1000);
   };
 
   return (
@@ -57,23 +73,14 @@ function Register() {
       <Box component="form" onSubmit={handleSubmit}>
         <TextField
           fullWidth
-          label="Full Name"
+          label="Username"
           margin="normal"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          value={formData.username}
+          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
           required
           disabled={loading}
         />
-        <TextField
-          fullWidth
-          label="Email"
-          type="email"
-          margin="normal"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-          disabled={loading}
-        />
+
         <TextField
           fullWidth
           label="Password"
@@ -84,13 +91,23 @@ function Register() {
           required
           disabled={loading}
         />
-        <TextField
+        {/* <TextField
           fullWidth
           label="Confirm Password"
           type="password"
           margin="normal"
           value={formData.confirmPassword}
           onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+          required
+          disabled={loading}
+        /> */}
+        <TextField
+          fullWidth
+          label="Role"
+          type="text"
+          margin="normal"
+          value={formData.role}
+          onChange={(e) => setFormData({ ...formData, role: e.target.value })}
           required
           disabled={loading}
         />
