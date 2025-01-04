@@ -68,21 +68,29 @@ ADD COLUMN CategoryID INT,
 ADD FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID);
 
 INSERT INTO Users (username, password_hash, role)
-VALUES ('admin1', 'hashed_password_1', 'Admin'),('manager1', 'hashed_password_2', 'Manager'),('staff1', 'hashed_password_3', 'Staff'),
+VALUES 
+    ('admin1', 'hashed_password_1', 'Admin'),
+    ('manager1', 'hashed_password_2', 'Manager'),
+    ('staff1', 'hashed_password_3', 'Staff'),
     ('staff2', 'hashed_password_4', 'Staff');
 
+-- Insert Values into Products Table
 INSERT INTO Products (product_name, category_id, stock_level, reorder_point)
 VALUES 
-    ('4G Router', 1, 50, 10),
+    ('4G Router', 5, 50, 10),
     ('Ethernet Cable', 2, 200, 50),
     ('Network Switch', 3, 30, 5),
     ('Outdoor Antenna', 4, 15, 5),
-    ('5G Router', 1, 20, 8);
+    ('5G Router', 5, 20, 8);
+
+-- Insert Values into Suppliers Table
 INSERT INTO Suppliers (supplier_name, contact_name, contact_email, contact_phone)
 VALUES 
     ('TechSupplies Co.', 'Alice Johnson', 'alice@techsupplies.com', '123-456-7890'),
     ('NetWorld Inc.', 'Bob Smith', 'bob@networld.com', '987-654-3210'),
     ('SignalTools Ltd.', 'Charlie Brown', 'charlie@signaltools.com', '555-555-5555');
+
+-- Insert Values into Transactions Table
 INSERT INTO Transactions (product_id, supplier_id, user_id, transaction_type, quantity)
 VALUES 
     (1, 1, 1, 'Stock In', 20),  -- Admin adds 20 units of 4G Router
@@ -90,6 +98,14 @@ VALUES
     (3, NULL, 3, 'Stock Out', 5), -- Staff removes 5 units of Network Switch
     (4, 3, 4, 'Stock Out', 3);  -- Staff removes 3 units of Outdoor Antenna
 
+-- Insert Values into SupplierOrders Table
+INSERT INTO SupplierOrders (SupplierID, ProductID, Quantity)
+VALUES 
+    (1, 1, 50), 
+    (2, 2, 100), 
+    (3, 4, 20); 
+
+-- Insert Values into Notifications Table
 INSERT INTO Notifications (notification_message, user_id, product_id, notification_type)
 VALUES 
     ('Low stock alert: 4G Router stock is below reorder point.', 1, 1, 'Low Stock'),
