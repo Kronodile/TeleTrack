@@ -1,35 +1,63 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import theme from './theme';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import DashboardLayout from './layouts/DashboardLayout';
+import AuthLayout from './layouts/AuthLayout';
+import Login from './pages/auth/Login';
+import Dashboard from './pages/Dashboard';
+import Products from './pages/products/Products';
+import Suppliers from './pages/suppliers/Suppliers';
+import Users from './pages/users/Users';
+import Register from './pages/auth/Register';
+import { AuthProvider } from './contexts/AuthContext';
+import RoleBasedRoute from './components/auth/RoleBasedRoute';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <AuthProvider>
+        <ThemeProvider theme={theme}>
+          <ToastContainer />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={
+              <AuthLayout>
+                <Login />
+              </AuthLayout>
+            } />
+            
+            {/* Protected routes */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="products" element={
+                <RoleBasedRoute requiredRole="staff">
+                  <Products />
+                </RoleBasedRoute>
+              } />
+              <Route path="suppliers" element={
+                <RoleBasedRoute requiredRole="manager">
+                  <Suppliers />
+                </RoleBasedRoute>
+              } />
+              <Route path="users" element={
+                <RoleBasedRoute requiredRole="admin">
+                  <Users />
+                </RoleBasedRoute>
+              } />
+            </Route>
+          </Routes>
+        </ThemeProvider>
+      </AuthProvider>
+    </Router>
+  );
 }
 
-export default App
+export default App;
