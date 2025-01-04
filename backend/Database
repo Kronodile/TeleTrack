@@ -111,3 +111,12 @@ VALUES
     ('Low stock alert: 4G Router stock is below reorder point.', 1, 1, 'Low Stock'),
     ('Reorder reminder: Ethernet Cable stock needs to be replenished.', 2, 2, 'Reorder Reminder'),
     ('Order delay: Network Switch delivery is delayed.', 3, 3, 'Order Delay');
+
+
+INSERT INTO Categories (CategoryName, Description)
+VALUES
+('Electronics', 'Devices and gadgets like phones, computers, cameras, etc.'),
+('Furniture', 'Furniture items such as chairs, tables, sofas, etc.'),
+('Clothing', 'Apparel including shirts, pants, dresses, etc.'),
+('Books', 'Various types of books including fiction, non-fiction, academic, and more.'),
+('Home Appliances', 'Appliances like refrigerators, washing machines, and microwave ovens.');
