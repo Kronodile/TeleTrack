@@ -44,6 +44,16 @@ CREATE TABLE SupplierOrders (
     FOREIGN KEY (SupplierID) REFERENCES Suppliers(SupplierID),
     FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
 );
+CREATE TABLE Notifications (
+    notification_id SERIAL PRIMARY KEY,
+    notification_message TEXT NOT NULL,
+    user_id INT,
+    product_id INT,
+    notification_type ENUM('Low Stock', 'Order Delay', 'Reorder Reminder') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE SET NULL,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE
+);
 
 CREATE TABLE Categories (
     CategoryID INT AUTO_INCREMENT PRIMARY KEY,
@@ -56,3 +66,32 @@ CREATE TABLE Categories (
 ALTER TABLE Products
 ADD COLUMN CategoryID INT,
 ADD FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID);
+
+INSERT INTO Users (username, password_hash, role)
+VALUES ('admin1', 'hashed_password_1', 'Admin'),('manager1', 'hashed_password_2', 'Manager'),('staff1', 'hashed_password_3', 'Staff'),
+    ('staff2', 'hashed_password_4', 'Staff');
+
+INSERT INTO Products (product_name, category_id, stock_level, reorder_point)
+VALUES 
+    ('4G Router', 1, 50, 10),
+    ('Ethernet Cable', 2, 200, 50),
+    ('Network Switch', 3, 30, 5),
+    ('Outdoor Antenna', 4, 15, 5),
+    ('5G Router', 1, 20, 8);
+INSERT INTO Suppliers (supplier_name, contact_name, contact_email, contact_phone)
+VALUES 
+    ('TechSupplies Co.', 'Alice Johnson', 'alice@techsupplies.com', '123-456-7890'),
+    ('NetWorld Inc.', 'Bob Smith', 'bob@networld.com', '987-654-3210'),
+    ('SignalTools Ltd.', 'Charlie Brown', 'charlie@signaltools.com', '555-555-5555');
+INSERT INTO Transactions (product_id, supplier_id, user_id, transaction_type, quantity)
+VALUES 
+    (1, 1, 1, 'Stock In', 20),  -- Admin adds 20 units of 4G Router
+    (2, 2, 2, 'Stock In', 100), -- Manager adds 100 units of Ethernet Cable
+    (3, NULL, 3, 'Stock Out', 5), -- Staff removes 5 units of Network Switch
+    (4, 3, 4, 'Stock Out', 3);  -- Staff removes 3 units of Outdoor Antenna
+
+INSERT INTO Notifications (notification_message, user_id, product_id, notification_type)
+VALUES 
+    ('Low stock alert: 4G Router stock is below reorder point.', 1, 1, 'Low Stock'),
+    ('Reorder reminder: Ethernet Cable stock needs to be replenished.', 2, 2, 'Reorder Reminder'),
+    ('Order delay: Network Switch delivery is delayed.', 3, 3, 'Order Delay');
