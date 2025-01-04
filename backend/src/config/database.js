@@ -6,9 +6,17 @@ const sequelize = new Sequelize({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
   dialect: 'mysql',
   logging: false
 });
+
+// Test the connection
+sequelize.authenticate()
+  .then(() => {
+    console.log('Database connection established');
+  })
+  .catch(err => {
+    console.error('Unable to connect to database:', err);
+  });
 
 module.exports = sequelize;

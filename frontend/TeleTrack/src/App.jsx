@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from '@mui/material';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ApiProvider } from './contexts/ApiContext';
 
 import theme from './theme';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -29,6 +30,12 @@ function App() {
                 <Login />
               </AuthLayout>
             } />
+            {/* Add Register route */}
+            <Route path="/register" element={
+                <AuthLayout>
+                  <Register />
+                </AuthLayout>
+              } />
             
             {/* Protected routes */}
             <Route path="/" element={

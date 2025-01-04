@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { authService } from '../../services/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Box, 
@@ -29,24 +30,17 @@ function Login() {
     setError('');
     
     try {
-      // Simulate successful login for demonstration
-      // Replace this with actual API call in production
-      const userData = {
-        token: 'dummy-token',
-        role: 'admin',
-        name: 'Test User'
-      };
-      
-      login(userData);
-      toast.success('Login successful!');
-      navigate('/');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
-      toast.error('Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
+        const response = await authService.login(credentials);
+        login(response.data); // This will set token and user info
+        toast.success('Login successful!');
+        navigate('/');
+      } catch (err) {
+        setError(err.response?.data?.message || 'Login failed');
+        toast.error('Login failed');
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <Paper 

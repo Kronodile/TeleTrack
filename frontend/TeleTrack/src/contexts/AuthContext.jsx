@@ -3,23 +3,17 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Initialize user state from localStorage
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('userRole');
+    const name = localStorage.getItem('userName');
+    return token && role && name ? { token, role, name } : null;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage for user data on mount
-    const checkAuth = () => {
-      const token = localStorage.getItem('token');
-      const role = localStorage.getItem('userRole');
-      const name = localStorage.getItem('userName');
-
-      if (token && role && name) {
-        setUser({ token, role, name });
-      }
-      setLoading(false);
-    };
-
-    checkAuth();
+    setLoading(false);
   }, []);
 
   const login = (userData) => {
@@ -39,24 +33,21 @@ export function AuthProvider({ children }) {
 
   const hasPermission = (requiredRole) => {
     if (!user) return false;
-    
-    const roleHierarchy = {
+    const roles = {
       admin: 3,
       manager: 2,
       staff: 1
     };
-
-    return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
+    return roles[user.role] >= roles[requiredRole];
   };
 
   return (
     <AuthContext.Provider value={{ 
       user, 
-      setUser, 
-      hasPermission, 
-      loading,
       login,
-      logout 
+      logout,
+      hasPermission,
+      loading 
     }}>
       {!loading && children}
     </AuthContext.Provider>

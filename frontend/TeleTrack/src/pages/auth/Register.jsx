@@ -10,9 +10,13 @@ import {
   Divider 
 } from '@mui/material';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../contexts/AuthContext';
+import { authService } from '../../services/api';
 
 function Register() {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -32,14 +36,22 @@ function Register() {
     }
 
     setLoading(true);
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      localStorage.setItem('token', 'dummy-token');
+    try {
+      const response = await authService.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      });
+      
+      login(response.data);
       toast.success('Registration successful!');
       navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Registration failed');
+      toast.error('Registration failed');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -47,72 +59,57 @@ function Register() {
       <Typography variant="h5" component="h1" gutterBottom align="center">
         Create Account
       </Typography>
-      
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Box component="form" onSubmit={handleSubmit}>
         <TextField
           fullWidth
-          label="Full Name"
-          margin="normal"
+          label="Name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          margin="normal"
           required
-          disabled={loading}
         />
         <TextField
           fullWidth
-          label="Email"
           type="email"
-          margin="normal"
+          label="Email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          margin="normal"
           required
-          disabled={loading}
         />
         <TextField
           fullWidth
-          label="Password"
           type="password"
-          margin="normal"
+          label="Password"
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          margin="normal"
           required
-          disabled={loading}
         />
         <TextField
           fullWidth
-          label="Confirm Password"
           type="password"
-          margin="normal"
+          label="Confirm Password"
           value={formData.confirmPassword}
           onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+          margin="normal"
           required
-          disabled={loading}
         />
         <Button
           type="submit"
-          variant="contained"
           fullWidth
-          sx={{ mt: 2 }}
+          variant="contained"
+          sx={{ mt: 3 }}
           disabled={loading}
         >
-          {loading ? 'Creating Account...' : 'Register'}
+          {loading ? 'Creating Account...' : 'Create Account'}
         </Button>
-
-        <Divider sx={{ my: 2 }} />
-        
-        <Typography align="center">
-          Already have an account?{' '}
-          <Link to="/login" style={{ textDecoration: 'none' }}>
-            Login here
-          </Link>
-        </Typography>
       </Box>
+      <Divider sx={{ my: 2 }} />
+      <Typography align="center">
+        Already have an account? <Link to="/login">Login</Link>
+      </Typography>
     </Paper>
   );
 }
