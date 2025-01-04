@@ -16,12 +16,18 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = (userData) => {
-    const { token, role, name } = userData;
+ // frontend/TeleTrack/src/contexts/AuthContext.jsx
+ const login = (userData) => {
+    const { token, user } = userData;
     localStorage.setItem('token', token);
-    localStorage.setItem('userRole', role);
-    localStorage.setItem('userName', name);
-    setUser({ token, role, name });
+    localStorage.setItem('userRole', user.role);
+    localStorage.setItem('userName', user.name);
+    setUser({ 
+      token,
+      role: user.role,
+      name: user.name,
+      id: user.id 
+    });
   };
 
   const logout = () => {

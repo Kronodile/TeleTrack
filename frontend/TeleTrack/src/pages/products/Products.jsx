@@ -1,86 +1,76 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
-  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Paper,
   IconButton,
   Dialog,
-  CircularProgress,
-  Alert
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
-import { Edit, Delete, Add } from '@mui/icons-material';
-import { productService } from '../../services/api';
+import { Add, Edit, Delete } from '@mui/icons-material';
 import ProductForm from './ProductForm';
+import { productService } from '../../services/api';
+import DeleteConfirmDialog from '../../components/DeleteConfirmDialog';
+import { useSnackbar } from 'notistack';
 
-function Products() {
+const Products = () => {
   const [products, setProducts] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    loadProducts();
+    fetchProducts();
   }, []);
 
-  const loadProducts = async () => {
-    setLoading(true);
+  const fetchProducts = async () => {
     try {
       const response = await productService.getAll();
       setProducts(response.data);
-      setError(null);
-    } catch (err) {
-      setError('Failed to load products');
-      console.error(err);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      enqueueSnackbar('Error fetching products', { variant: 'error' });
     }
   };
 
-  const handleSave = async (productData) => {
+  const handleSubmit = async (formData) => {
     try {
       if (selectedProduct) {
-        await productService.update(selectedProduct.id, productData);
+        await productService.update(selectedProduct.product_id, formData);
+        enqueueSnackbar('Product updated successfully', { variant: 'success' });
       } else {
-        await productService.create(productData);
+        await productService.create(formData);
+        enqueueSnackbar('Product created successfully', { variant: 'success' });
       }
       setOpen(false);
-      loadProducts();
-    } catch (err) {
-      setError('Failed to save product');
-      console.error(err);
+      fetchProducts();
+    } catch (error) {
+      enqueueSnackbar('Error saving product', { variant: 'error' });
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
     try {
-      await productService.delete(id);
+      await productService.delete(selectedProduct.product_id);
+      enqueueSnackbar('Product deleted successfully', { variant: 'success' });
       setDeleteDialogOpen(false);
-      loadProducts();
-    } catch (err) {
-      setError('Failed to delete product');
-      console.error(err);
+      fetchProducts();
+    } catch (error) {
+      enqueueSnackbar('Error deleting product', { variant: 'error' });
     }
   };
-
-  if (loading) {
-    return <CircularProgress />;
-  }
 
   return (
-    <Box>
-      {error && <Alert severity="error">{error}</Alert>}
-      
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <h2>Products</h2>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
         <Button
           variant="contained"
           startIcon={<Add />}
@@ -100,15 +90,17 @@ function Products() {
               <TableCell>Name</TableCell>
               <TableCell>Category</TableCell>
               <TableCell>Stock Level</TableCell>
+              <TableCell>Reorder Point</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>{product.name}</TableCell>
+              <TableRow key={product.product_id}>
+                <TableCell>{product.product_name}</TableCell>
                 <TableCell>{product.category}</TableCell>
-                <TableCell>{product.stockLevel}</TableCell>
+                <TableCell>{product.stock_level}</TableCell>
+                <TableCell>{product.reorder_point}</TableCell>
                 <TableCell>
                   <IconButton
                     onClick={() => {
@@ -118,9 +110,9 @@ function Products() {
                   >
                     <Edit />
                   </IconButton>
-                  <IconButton 
+                  <IconButton
                     onClick={() => {
-                      setProductToDelete(product);
+                      setSelectedProduct(product);
                       setDeleteDialogOpen(true);
                     }}
                   >
@@ -133,35 +125,28 @@ function Products() {
         </Table>
       </TableContainer>
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <ProductForm 
-          product={selectedProduct}
-          onSave={handleSave}
-          onCancel={() => setOpen(false)}
-        />
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {selectedProduct ? 'Edit Product' : 'Add Product'}
+        </DialogTitle>
+        <DialogContent>
+          <ProductForm
+            initialData={selectedProduct}
+            onSubmit={handleSubmit}
+            onCancel={() => setOpen(false)}
+          />
+        </DialogContent>
       </Dialog>
 
-      <Dialog
+      <DeleteConfirmDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-      >
-        <Box p={2}>
-          <h3>Confirm Delete</h3>
-          <p>Are you sure you want to delete {productToDelete?.name}?</p>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-            <Button 
-              variant="contained" 
-              color="error"
-              onClick={() => handleDelete(productToDelete?.id)}
-            >
-              Delete
-            </Button>
-          </Box>
-        </Box>
-      </Dialog>
+        onConfirm={handleDelete}
+        title="Delete Product"
+        content="Are you sure you want to delete this product?"
+      />
     </Box>
   );
-}
+};
 
 export default Products;

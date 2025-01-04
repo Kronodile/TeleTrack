@@ -9,25 +9,27 @@ const User = sequelize.define('User', {
     autoIncrement: true
   },
   name: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(100),
     allowNull: false
   },
   email: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(100),
     allowNull: false,
-    unique: true,
-    validate: {
-      isEmail: true
-    }
+    unique: true
   },
   password: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false
   },
   role: {
     type: DataTypes.ENUM('admin', 'manager', 'staff'),
     defaultValue: 'staff'
   }
+}, {
+  tableName: 'Users',
+  timestamps: true,
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 });
 
 // Hash password before saving

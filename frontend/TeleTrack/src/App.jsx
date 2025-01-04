@@ -1,69 +1,72 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { ApiProvider } from './contexts/ApiContext';
-
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import { SnackbarProvider } from 'notistack';
 import theme from './theme';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import DashboardLayout from './layouts/DashboardLayout';
 import AuthLayout from './layouts/AuthLayout';
-import Login from './pages/auth/Login';
-import Dashboard from './pages/Dashboard';
-import Products from './pages/products/Products';
-import Suppliers from './pages/suppliers/Suppliers';
-import Users from './pages/users/Users';
-import Register from './pages/auth/Register';
-import { AuthProvider } from './contexts/AuthContext';
-import RoleBasedRoute from './components/auth/RoleBasedRoute';
+import DashboardLayout from './layouts/DashboardLayout';
+import {
+  Login,
+  Register,
+  Dashboard,
+  Products,
+  Suppliers,
+  Users,
+} from './pages';
+
+import { ProtectedRoute, RoleBasedRoute } from './components/auth';
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <ThemeProvider theme={theme}>
-          <ToastContainer />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={
-              <AuthLayout>
-                <Login />
-              </AuthLayout>
+    <ThemeProvider theme={theme}>
+      <SnackbarProvider maxSnack={3} 
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={
+            <AuthLayout>
+              <Login />
+            </AuthLayout>
+          } />
+          <Route path="/register" element={
+            <AuthLayout>
+              <Register />
+            </AuthLayout>
+          } />
+          
+          {/* Protected routes */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Dashboard />} />
+            <Route path="products" element={
+              <RoleBasedRoute requiredRole="staff">
+                <Products />
+              </RoleBasedRoute>
             } />
-            {/* Add Register route */}
-            <Route path="/register" element={
-                <AuthLayout>
-                  <Register />
-                </AuthLayout>
-              } />
-            
-            {/* Protected routes */}
-            <Route path="/" element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Dashboard />} />
-              <Route path="products" element={
-                <RoleBasedRoute requiredRole="staff">
-                  <Products />
-                </RoleBasedRoute>
-              } />
-              <Route path="suppliers" element={
-                <RoleBasedRoute requiredRole="manager">
-                  <Suppliers />
-                </RoleBasedRoute>
-              } />
-              <Route path="users" element={
-                <RoleBasedRoute requiredRole="admin">
-                  <Users />
-                </RoleBasedRoute>
-              } />
-            </Route>
-          </Routes>
-        </ThemeProvider>
-      </AuthProvider>
-    </Router>
+            <Route path="suppliers" element={
+              <RoleBasedRoute requiredRole="manager">
+                <Suppliers />
+              </RoleBasedRoute>
+            } />
+            <Route path="users" element={
+              <RoleBasedRoute requiredRole="admin">
+                <Users />
+              </RoleBasedRoute>
+            } />
+            {/* Redirect /dashboard to root */}
+            <Route path="dashboard" element={<Navigate to="/" replace />} />
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </SnackbarProvider>
+    </ThemeProvider>
   );
 }
 

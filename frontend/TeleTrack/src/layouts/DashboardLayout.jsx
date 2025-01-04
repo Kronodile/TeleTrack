@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 import {
@@ -29,107 +29,140 @@ import { toast } from 'react-toastify';
 const DRAWER_WIDTH = 240;
 
 function DashboardLayout() {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
-  const [open, setOpen] = useState(false);
+  const { logout } = useAuth();
 
   const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/' },
-    { text: 'Products', icon: <Inventory />, path: '/products' },
-    { text: 'Suppliers', icon: <LocalShipping />, path: '/suppliers' },
-    { text: 'Users', icon: <People />, path: '/users' },
+    { text: 'Dashboard', icon: <Dashboard />, path: '/', role: 'staff' },
+    { text: 'Products', icon: <Inventory />, path: '/products', role: 'staff' },
+    { text: 'Suppliers', icon: <LocalShipping />, path: '/suppliers', role: 'manager' },
+    { text: 'Users', icon: <People />, path: '/users', role: 'admin' }
   ];
 
-  const handleLogout = () => {
-    logout();
-    toast.success('Logged out successfully');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+      toast.success('Logged out successfully');
+    } catch (error) {
+      toast.error('Failed to log out');
+    }
   };
+
+  const drawer = (
+    <>
+      <Toolbar>
+        <Typography variant="h6" noWrap component="div">
+          TeleTrack
+        </Typography>
+      </Toolbar>
+      <Divider />
+      <List>
+        {menuItems.map((item) => (
+          <ListItem
+            key={item.text}
+            component={RouterLink}
+            to={item.path}
+            selected={location.pathname === item.path}
+            onClick={() => setOpen(false)}
+            sx={{
+              textDecoration: 'none',
+              color: 'inherit',
+              '&.Mui-selected': {
+                backgroundColor: 'primary.grey',
+                '&:hover': {
+                  backgroundColor: 'primary.grey',
+                },
+              },
+            }}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+      <ListItem onClick={handleLogout} sx={{ cursor: 'pointer' }}>          <ListItemIcon>
+            <Logout />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItem>
+      </List>
+    </>
+  );
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
+          ml: { sm: `${DRAWER_WIDTH}px` },
+        }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
-            onClick={() => setOpen(!open)}
             edge="start"
-            sx={{ marginRight: 2 }}
+            onClick={() => setOpen(!open)}
+            sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" noWrap component="div">
             TeleTrack
           </Typography>
-          <Typography variant="subtitle1" sx={{ mr: 2 }}>
-            {user?.name} ({user?.role})
-          </Typography>
-          <Button 
-            color="inherit" 
-            onClick={handleLogout}
-            startIcon={<Logout />}
-          >
-            Logout
-          </Button>
         </Toolbar>
       </AppBar>
 
-      <Drawer
-        variant="persistent"
-        anchor="left"
-        open={open}
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: DRAWER_WIDTH,
-            boxSizing: 'border-box',
-          },
-        }}
+      <Box
+        component="nav"
+        sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}
       >
-        <Toolbar /> {/* Spacing for AppBar */}
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
-            {menuItems.map((item) => (
-              <ListItem
-                key={item.text}
-                component={Link}
-                to={item.path}
-                selected={location.pathname === item.path}
-                onClick={() => setOpen(false)}
-                sx={{
-                  '&.Mui-selected': {
-                    backgroundColor: 'primary.light',
-                    '&:hover': {
-                      backgroundColor: 'primary.light',
-                    },
-                  },
-                }}
-              >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
+        <Drawer
+          variant="temporary"
+          open={open}
+          onClose={() => setOpen(false)}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
 
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          width: `calc(100% - ${open ? DRAWER_WIDTH : 0}px)`,
-          marginLeft: open ? `${DRAWER_WIDTH}px` : 0,
-          transition: theme =>
+          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
+          marginLeft: { sm: `${DRAWER_WIDTH}px` },
+          transition: (theme) =>
             theme.transitions.create(['margin', 'width'], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.leavingScreen,
             }),
         }}
       >
-        <Toolbar /> {/* Spacing for AppBar */}
+        <Toolbar />
         <Outlet />
       </Box>
     </Box>

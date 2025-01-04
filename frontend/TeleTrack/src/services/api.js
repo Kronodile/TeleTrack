@@ -25,11 +25,9 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        // Only redirect if not already on login page
+        // Handle unauthorized access
         if (!window.location.pathname.includes('/login')) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('userRole');
-          localStorage.removeItem('userName');
+          localStorage.clear(); // Clear all auth data
           window.location.href = '/login';
         }
       }
@@ -42,22 +40,15 @@ export const authService = {
     login: async (credentials) => {
       try {
         const response = await api.post('/auth/login', credentials);
-        if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
-        }
         return response;
       } catch (error) {
         console.error('Login error:', error);
         throw error;
       }
     },
-    // Add register method
     register: async (userData) => {
       try {
         const response = await api.post('/auth/register', userData);
-        if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
-        }
         return response;
       } catch (error) {
         console.error('Registration error:', error);
@@ -67,7 +58,12 @@ export const authService = {
   };
 export const productService = {
   getAll: () => api.get('/products'),
-  create: (data) => api.post('/products', data),
+  create: (data) => api.post('/products', {
+    product_name: data.name,
+    category: data.category,
+    stock_level: data.stockLevel,
+    reorder_point: data.reorderPoint
+  }),
   update: (id, data) => api.put(`/products/${id}`, data),
   delete: (id) => api.delete(`/products/${id}`),
   getLowStock: () => api.get('/products/low-stock'),

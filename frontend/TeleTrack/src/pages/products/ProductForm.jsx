@@ -13,7 +13,8 @@ function ProductForm({ product, onSave, onCancel }) {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
-    stockLevel: 0
+    stockLevel: 0,
+    reorder_point: 10  
   });
 
   useEffect(() => {
