@@ -1,5 +1,12 @@
-CREATE TABLE pRODUCT (
-    product_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE Users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('Admin', 'Manager', 'Staff') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE Products (
+    product_id SERIAL PRIMARY KEY,
     product_name VARCHAR(100) NOT NULL,
     category VARCHAR(50),
     stock_level INT NOT NULL DEFAULT 0,
@@ -7,16 +14,16 @@ CREATE TABLE pRODUCT (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-CREATE TABLE sUPLLIERS (
-    supplier_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE Suppliers (
+    supplier_id SERIAL PRIMARY KEY,
     supplier_name VARCHAR(100) NOT NULL,
     contact_name VARCHAR(100),
     contact_email VARCHAR(100) UNIQUE,
     contact_phone VARCHAR(15),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE tRANSCATIONS (
-    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE Transactions (
+    transaction_id SERIAL PRIMARY KEY,
     product_id INT NOT NULL,
     supplier_id INT,
     user_id INT NOT NULL,
@@ -27,4 +34,3 @@ CREATE TABLE tRANSCATIONS (
     FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id) ON DELETE SET NULL,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
-
