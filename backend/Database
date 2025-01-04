@@ -22,12 +22,16 @@ CREATE TABLE Suppliers (
     contact_phone VARCHAR(15),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+-- First, define the ENUM type
+CREATE TYPE transaction_type AS ENUM ('Stock In', 'Stock Out');
+
+-- Now, create the Transactions table
 CREATE TABLE Transactions (
     transaction_id SERIAL PRIMARY KEY,
     product_id INT NOT NULL,
     supplier_id INT,
     user_id INT NOT NULL,
-    transaction_type ENUM('Stock In', 'Stock Out') NOT NULL,
+    transaction_type transaction_type NOT NULL,  -- Use the defined ENUM type
     quantity INT NOT NULL,
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE,
