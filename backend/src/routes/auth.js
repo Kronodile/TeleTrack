@@ -18,13 +18,18 @@ router.post("/signup", async (req, res) => {
       return res.status(409).json({ error: "User already exists." });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const password_hash = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
       username,
-      password_hash: hashedPassword,
+      password_hash,
       role,
     });
+    console.log("username",username);
+    
+    console.log("original pass", password);
+    
+    console.log("pass hash while signing up", password_hash);
     
     const token =await jwt.sign({username,role},process.env.JWT_SECRET);
 
@@ -97,8 +102,11 @@ router.post('/login', async (req, res) => {
 
     user=user.dataValues;    
     console.log(user);
+    console.log("user password",password);
+    console.log("hashed", user.password_hash);
     
     const isValid = await bcrypt.compare(password, user.password_hash);
+
     if (!isValid) {
       return res.status(401).json({ error: "Invalid credentials." });
     }
@@ -112,6 +120,8 @@ router.post('/login', async (req, res) => {
     res.json({ token, role: user.role, username: user.username });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
+    console.log(error);
+    
   }
 });
 

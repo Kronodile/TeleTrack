@@ -29,13 +29,13 @@ const User = sequelize.define('User', {
 }, {
   tableName: 'Users', // Matches the table name in the SQL query
   timestamps: false,  // Disables Sequelize's default timestamps (createdAt and updatedAt)
-  hooks: {
-    beforeCreate: async (user) => {
-      if (user.password_hash) {
-        user.password_hash = await bcrypt.hash(user.password_hash, 10);
-      }
-    },
-  },
+  // hooks: {
+  //   beforeCreate: async (user) => {
+  //     if (user.password_hash) {
+  //       user.password_hash = await bcrypt.hash(user.password_hash, 10);
+  //     }
+  //   },
+  // },
 });
 
 module.exports = User;

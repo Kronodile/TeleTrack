@@ -27,12 +27,10 @@ export function AuthProvider({ children }) {
     const response  = await authService.register(userData);
     return response;
   }
-  const login = (userData) => {
-    const { token, role, name } = userData;
-    localStorage.setItem('token', token);
-    localStorage.setItem('userRole', role);
-    localStorage.setItem('userName', name);
-    setUser({ token, role, name });
+  const login = async (userData) => {
+    const { username, password} = userData;
+    const response = await authService.login({username,password});
+    return response;
   };
 
   const logout = () => {
