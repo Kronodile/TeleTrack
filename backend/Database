@@ -126,3 +126,142 @@ VALUES
 ('Clothing', 'Apparel including shirts, pants, dresses, etc.'),
 ('Books', 'Various types of books including fiction, non-fiction, academic, and more.'),
 ('Home Appliances', 'Appliances like refrigerators, washing machines, and microwave ovens.');
+
+
+
+
+-- Create Users table
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('Admin', 'Manager', 'Staff') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Products table
+CREATE TABLE Products (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_name VARCHAR(100) NOT NULL,
+    category VARCHAR(50),
+    stock_level INT NOT NULL DEFAULT 0,
+    reorder_point INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create Suppliers table
+CREATE TABLE Suppliers (
+    supplier_id INT AUTO_INCREMENT PRIMARY KEY,
+    supplier_name VARCHAR(100) NOT NULL,
+    contact_name VARCHAR(100),
+    contact_email VARCHAR(100) UNIQUE,
+    contact_phone VARCHAR(15),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Transactions table
+CREATE TABLE Transactions (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    supplier_id INT,
+    user_id INT NOT NULL,
+    transaction_type ENUM('Stock In', 'Stock Out') NOT NULL,
+    quantity INT NOT NULL,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id) ON DELETE SET NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- Create SupplierOrders table
+CREATE TABLE SupplierOrders (
+    OrderID INT AUTO_INCREMENT PRIMARY KEY,
+    SupplierID INT NOT NULL,
+    ProductID INT NOT NULL,
+    Quantity INT NOT NULL,
+    OrderDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (SupplierID) REFERENCES Suppliers(supplier_id),
+    FOREIGN KEY (ProductID) REFERENCES Products(product_id)
+);
+
+-- Create Notifications table
+CREATE TABLE Notifications (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    notification_message TEXT NOT NULL,
+    user_id INT,
+    product_id INT,
+    notification_type ENUM('Low Stock', 'Order Delay', 'Reorder Reminder') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE SET NULL,
+    FOREIGN KEY (product_id) REFERENCES Products(product_id) ON DELETE CASCADE
+);
+
+-- Create Categories table
+CREATE TABLE Categories (
+    CategoryID INT AUTO_INCREMENT PRIMARY KEY,
+    CategoryName VARCHAR(100) NOT NULL,
+    Description TEXT,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Alter Products table to add CategoryID foreign key
+ALTER TABLE Products
+ADD COLUMN CategoryID INT,
+ADD FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID);
+
+-- Insert data into Users
+INSERT INTO Users (username, password_hash, role)
+VALUES 
+    ('admin1', 'hashed_password_1', 'Admin'),
+    ('manager1', 'hashed_password_2', 'Manager'),
+    ('staff1', 'hashed_password_3', 'Staff'),
+    ('staff2', 'hashed_password_4', 'Staff');
+
+-- Insert data into Products
+INSERT INTO Products (product_name, category, stock_level, reorder_point)
+VALUES 
+    ('4G Router', 5, 50, 10),
+    ('Ethernet Cable', 2, 200, 50),
+    ('Network Switch', 3, 30, 5),
+    ('Outdoor Antenna', 4, 15, 5),
+    ('5G Router', 5, 20, 8);
+
+-- Insert data into Suppliers
+INSERT INTO Suppliers (supplier_name, contact_name, contact_email, contact_phone)
+VALUES 
+    ('TechSupplies Co.', 'Alice Johnson', 'alice@techsupplies.com', '123-456-7890'),
+    ('NetWorld Inc.', 'Bob Smith', 'bob@networld.com', '987-654-3210'),
+    ('SignalTools Ltd.', 'Charlie Brown', 'charlie@signaltools.com', '555-555-5555');
+
+-- Insert data into Transactions
+INSERT INTO Transactions (product_id, supplier_id, user_id, transaction_type, quantity)
+VALUES 
+    (1, 1, 1, 'Stock In', 20),  -- Admin adds 20 units of 4G Router
+    (2, 2, 2, 'Stock In', 100), -- Manager adds 100 units of Ethernet Cable
+    (3, NULL, 3, 'Stock Out', 5), -- Staff removes 5 units of Network Switch
+    (4, 3, 4, 'Stock Out', 3);  -- Staff removes 3 units of Outdoor Antenna
+
+-- Insert data into SupplierOrders
+INSERT INTO SupplierOrders (SupplierID, ProductID, Quantity)
+VALUES 
+    (1, 1, 50), 
+    (2, 2, 100), 
+    (3, 4, 20); 
+
+-- Insert data into Notifications
+INSERT INTO Notifications (notification_message, user_id, product_id, notification_type)
+VALUES 
+    ('Low stock alert: 4G Router stock is below reorder point.', 1, 1, 'Low Stock'),
+    ('Reorder reminder: Ethernet Cable stock needs to be replenished.', 2, 2, 'Reorder Reminder'),
+    ('Order delay: Network Switch delivery is delayed.', 3, 3, 'Order Delay');
+
+-- Insert data into Categories
+INSERT INTO Categories (CategoryName, Description)
+VALUES
+('Electronics', 'Devices and gadgets like phones, computers, cameras, etc.'),
+('Furniture', 'Furniture items such as chairs, tables, sofas, etc.'),
+('Clothing', 'Apparel including shirts, pants, dresses, etc.'),
+('Books', 'Various types of books including fiction, non-fiction, academic, and more.'),
+('Home Appliances', 'Appliances like refrigerators, washing machines, and microwave ovens.');
+
